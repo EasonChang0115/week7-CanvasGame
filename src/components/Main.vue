@@ -6,6 +6,9 @@
 
 <script>
 import Vec2 from './Canvas/Vector.js';
+import global from '../util/global.js';
+import Player from './GameObj/Players.js';
+
 export default {
   name: 'Main',
   data () {
@@ -16,6 +19,7 @@ export default {
       wh: 0,
       updateFPS: 30,
       time: 0,
+      player: null,
       mousePos: new Vec2(0, 0),
       mousePosDown: new Vec2(0, 0),
       mousePosUp: new Vec2(0, 0)
@@ -31,6 +35,7 @@ export default {
       this.moveTo(v1.x, v1.y);
       this.lineTo(v2.x, v2.y);
     };
+    this.player = new Player({ctx: this.ctx});
     this.initCanvas();
     this.load();
     window.addEventListener('resize', this.initCanvas);
@@ -49,10 +54,18 @@ export default {
     render() {
       let ctx = this.ctx;
       // 清空背景
-      ctx.fillStyle = 'black';
+      ctx.fillStyle = global.color.bgBlue;
       ctx.fillRect(0, 0, this.ww, this.wh);
       // --------------------------
       // ---繪製區域
+      let center = this.player.p;
+      ctx.save();
+      ctx.translate(this.ww / 2, this.wh / 2);
+      ctx.scale(global.scale, global.scale);
+      ctx.translate(-center.x, -center.y);
+      this.drawLine();
+      this.player.draw();
+      ctx.restore();
       // --------------------------
       // 滑鼠繪製
       ctx.fillStyle = 'red';
@@ -79,6 +92,21 @@ export default {
       this.initCanvas();
       requestAnimationFrame(this.render);
       setInterval(this.update, 1000 / this.updateFPS);
+    },
+    // 繪製格線
+    drawLine() {
+      let ctx = this.ctx;
+      let gridWidth = 100;
+      let gcount = global.width / gridWidth;
+      ctx.beginPath();
+      for (let i = -gcount / 2; i <= gcount / 2; i++) {
+        ctx.moveTo(i * gridWidth, -global.height / 2);
+        ctx.lineTo(i * gridWidth, global.height / 2);
+        ctx.moveTo(-global.width / 2, i * gridWidth);
+        ctx.lineTo(global.width / 2, i * gridWidth);
+      }
+      ctx.strokeStyle = 'rgba(255,255,255,0.1)';
+      ctx.stroke();
     },
     mouseMove(evt) {
       this.mousePos.set(evt.x, evt.y);
