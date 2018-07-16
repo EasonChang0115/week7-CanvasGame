@@ -86,6 +86,13 @@ export default {
     },
     update() {
       this.time++;
+      this.player.update();
+      let delta = this.mousePos.sub(new Vec2(this.ww / 2, this.wh / 2)).mul(0.1);
+      let deltaLen = delta.length;
+      if (deltaLen > this.player.speed) {
+        delta = delta.unit.mul(this.player.speed);
+      }
+      this.player.v = delta;
     },
     load() {
       this.gameInit();
@@ -96,7 +103,7 @@ export default {
     // 繪製格線
     drawLine() {
       let ctx = this.ctx;
-      let gridWidth = 100;
+      let gridWidth = 50;
       let gcount = global.width / gridWidth;
       ctx.beginPath();
       for (let i = -gcount / 2; i <= gcount / 2; i++) {
@@ -114,12 +121,12 @@ export default {
     mouseUp(evt) {
       this.mousePos.set(evt.x, evt.y);
       this.mousePosUp = this.mousePos.clone();
-      console.log(this.mousePosUp);
+      // console.log(this.mousePosUp);
     },
     mouseDown(evt) {
       this.mousePos.set(evt.x, evt.y);
       this.mousePosDown = this.mousePos.clone();
-      console.log(this.mousePosDown);
+      // console.log(this.mousePosDown);
     }
   }
 };

@@ -1,5 +1,6 @@
 import GameObject from './GameObject';
 import Vec2 from '../Canvas/Vector';
+import global from '../../util/global.js';
 
 class Players extends GameObject {
   constructor(args) {
@@ -7,7 +8,7 @@ class Players extends GameObject {
     let def = {
       p: new Vec2(0, 0),
       color: 'white',
-      r: 75,
+      r: 75 / 2,
       maxR: 500,
       defendR: Math.PI / 2
     };
@@ -24,6 +25,27 @@ class Players extends GameObject {
     ctx.strokeStyle = this.color;
     ctx.stroke();
     ctx.restore();
+  }
+  update() {
+    this.p.move(this.v.x, this.v.y);
+    this.checkBoundary();
+  }
+  checkBoundary() {
+    if (this.p.x - this.r < -global.width / 2) {
+      this.p.x = -global.width / 2 + this.r;
+    }
+
+    if (this.p.x + this.r > global.width / 2) {
+      this.p.x = global.width / 2 - this.r;
+    }
+
+    if (this.p.y - this.r < -global.height / 2) {
+      this.p.y = -global.height / 2 + this.r;
+    }
+
+    if (this.p.y + this.r > global.height / 2) {
+      this.p.y = global.height / 2 - this.r;
+    }
   }
   collide(gobj) {}
 }

@@ -7,7 +7,7 @@ class GameObject {
       p: Vec2.ZERO,
       v: Vec2.ZERO,
       a: Vec2.ZERO,
-      speed: 40
+      speed: 4
     };
     Object.assign(def, args);
     Object.assign(this, def);
