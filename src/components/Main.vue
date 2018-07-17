@@ -183,12 +183,12 @@ export default {
     keydown(evt) {
       if (evt.key === 'w') {
         let args = {
-          p: initPosition,
-          v: mp.v.mul(1.5).add(mouseDelta.unit.mul(Math.random()*5 + 10)),
-          mass: 150,
-          color: mp.color,
+          // p: initPosition,
+          // v: mp.v.mul(1.5).add(mouseDelta.unit.mul(Math.random()*5 + 10)),
+          // mass: 150,
+          // color: mp.color,
           type: 'player'
-        }
+        };
         this.bullets.push(new Bullet(args));
       }
     }
