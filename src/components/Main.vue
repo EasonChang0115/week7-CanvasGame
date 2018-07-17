@@ -26,6 +26,7 @@ export default {
       player: null,
       level: 0,
       enemys: [],
+      bullets: [],
       mousePos: new Vec2(0, 0),
       mousePosDown: new Vec2(0, 0),
       mousePosUp: new Vec2(0, 0)
@@ -76,6 +77,7 @@ export default {
     window.addEventListener('mousemove', this.mouseMove);
     window.addEventListener('mouseup', this.mouseUp);
     window.addEventListener('mousedown', this.mouseDown);
+    window.addEventListener('keydown',this.keydown);
   },
   methods: {
     initCanvas() {
@@ -176,6 +178,18 @@ export default {
       this.mousePos.set(evt.x, evt.y);
       this.mousePosDown = this.mousePos.clone();
       // console.log(this.mousePosDown);
+    },
+    keydown(evt) {
+      if(evt.key === "w") { 
+        let args = {
+          p: initPosition,
+          v: mp.v.mul(1.5).add(mouseDelta.unit.mul(Math.random()*5 + 10)),
+          mass: 150,
+          color: mp.color,
+          type: 'bullet'
+        }
+        this.bullets.push()
+      }
     }
   }
 };
