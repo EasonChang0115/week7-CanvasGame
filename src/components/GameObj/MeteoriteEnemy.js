@@ -23,13 +23,23 @@ class MeteoriteEnemy extends GameObject {
       ctx.beginPath();
       ctx.moveTo(this.r * Math.cos(0), this.r * Math.sin(0));
       ctx.lineTo(this.r * Math.cos(Math.PI * 2 / 6), this.r * Math.sin(Math.PI * 2 / 6));
-      ctx.lineTo((this.r + 19) * Math.cos(Math.PI * 4 / 6), (this.r + 19) * Math.sin(Math.PI * 4 / 6));
+      ctx.lineTo((this.r - 5) * Math.cos(Math.PI * 4 / 6), (this.r - 5) * Math.sin(Math.PI * 4 / 6));
       ctx.lineTo(this.r * Math.cos(Math.PI * 6 / 6), this.r * Math.sin(Math.PI * 6 / 6));
       ctx.lineTo(this.r * Math.cos(Math.PI * 8 / 6), this.r * Math.sin(Math.PI * 8 / 6));
-      ctx.lineTo((this.r - 5) * Math.cos(Math.PI * 10 / 6), (this.r - 5) * Math.sin(Math.PI * 10 / 6) + 5);
+      ctx.lineTo((this.r + 19) * Math.cos(Math.PI * 10 / 6), (this.r + 19) * Math.sin(Math.PI * 10 / 6));
       ctx.closePath();
       ctx.fillStyle = global.color.red;
       ctx.fill();
+      // 陰影
+      ctx.save();
+        ctx.beginPath();
+        ctx.translate(0 + 20 * Math.cos(this.direction), 0 + 20 * Math.sin(this.direction));
+        ctx.arc(0, 0, this.r, 0, Math.PI * 2);
+        ctx.globalAlpha = 0.2;
+        ctx.fillStyle = global.color.red;
+        ctx.fill();
+      ctx.restore();
+
       // 閃電標記
       ctx.beginPath();
       ctx.moveTo(0, 20);
@@ -40,6 +50,7 @@ class MeteoriteEnemy extends GameObject {
       ctx.lineTo(-3, 3);
       ctx.lineTo(0, 20);
       ctx.fillStyle = 'white';
+      ctx.globalAlpha = 1;
       ctx.fill();
     }
     ctx.restore();
