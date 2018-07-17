@@ -8,6 +8,10 @@
 import Vec2 from './Canvas/Vector.js';
 import global from '../util/global.js';
 import Player from './GameObj/Players.js';
+import CircleEnemy from './GameObj/CircleEnemy.js';
+import TriangleEnemy from './GameObj/TriangleEnemy.js';
+import MeteoriteEnemy from './GameObj/MeteoriteEnemy.js';
+import { TweenMax } from 'gsap';
 
 export default {
   name: 'Main',
@@ -20,6 +24,8 @@ export default {
       updateFPS: 30,
       time: 0,
       player: null,
+      level: 0,
+      enemys: [],
       mousePos: new Vec2(0, 0),
       mousePosDown: new Vec2(0, 0),
       mousePosUp: new Vec2(0, 0)
@@ -36,6 +42,32 @@ export default {
       this.lineTo(v2.x, v2.y);
     };
     this.player = new Player({ctx: this.ctx});
+    this.enemys = global.Levels[this.level].enemys.map(enemy => {
+      let randomAngle = Math.random() * 360;
+      let x = global.maxR * 1.5 * Math.cos(randomAngle);
+      let y = global.maxR * 1.5 * Math.sin(randomAngle);
+      if (enemy === 'circle') {
+         return new CircleEnemy({
+          ctx: this.ctx,
+          p: new Vec2(x, y),
+          type: enemy
+        });
+      }
+      if (enemy === 'triangle') {
+         return new TriangleEnemy({
+          ctx: this.ctx,
+          p: new Vec2(x, y),
+          type: enemy
+        });
+      }
+      if (enemy === 'meteorite') {
+         return new MeteoriteEnemy({
+          ctx: this.ctx,
+          p: new Vec2(x, y),
+          type: enemy
+        });
+      }
+    });
     this.initCanvas();
     this.load();
     window.addEventListener('resize', this.initCanvas);
@@ -61,10 +93,12 @@ export default {
       let center = this.player.p;
       ctx.save();
       ctx.translate(this.ww / 2, this.wh / 2);
-      ctx.scale(global.scale, global.scale);
       ctx.translate(-center.x, -center.y);
       this.drawLine();
       this.player.draw();
+      this.enemys.forEach(enemy => {
+        enemy.draw();
+      });
       ctx.restore();
       // --------------------------
       // 滑鼠繪製
@@ -93,6 +127,21 @@ export default {
         delta = delta.unit.mul(this.player.speed);
       }
       this.player.v = delta;
+
+      this.enemys.forEach(enemy => {
+        enemy.update();
+        enemy.direction = this.player.p.sub(enemy.p).unit.angle;
+        if (enemy.p.sub(this.player.p).length !== global.maxR) {
+          let delta = enemy.p.sub(this.player.p);
+          let newV = delta.unit.mul(global.maxR);
+          TweenMax.to(enemy.p, 2, {x: newV.x, y: newV.y});
+        }
+        // if (Math.abs(enemy.p.sub(this.player.p).length - global.maxR) < 2) {
+        //   let randomAngleV = Math.random * 720 - 360;
+        //   let tangV = new Vec2(global.maxR * Math.cos(randomAngleV * Math.PI * 2), global.maxR * Math.sin(randomAngleV * Math.PI * 2));
+        //   enemy.v = tangV.unit.mul(enemy.speed);
+        // }
+      });
     },
     load() {
       this.gameInit();
