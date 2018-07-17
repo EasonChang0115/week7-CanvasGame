@@ -11,6 +11,7 @@ import Player from './GameObj/Players.js';
 import CircleEnemy from './GameObj/CircleEnemy.js';
 import TriangleEnemy from './GameObj/TriangleEnemy.js';
 import MeteoriteEnemy from './GameObj/MeteoriteEnemy.js';
+import Bullet from './GameObj/Bullet.js';
 import { TweenMax } from 'gsap';
 
 export default {
@@ -77,7 +78,7 @@ export default {
     window.addEventListener('mousemove', this.mouseMove);
     window.addEventListener('mouseup', this.mouseUp);
     window.addEventListener('mousedown', this.mouseDown);
-    window.addEventListener('keydown',this.keydown);
+    window.addEventListener('keydown', this.keydown);
   },
   methods: {
     initCanvas() {
@@ -180,15 +181,15 @@ export default {
       // console.log(this.mousePosDown);
     },
     keydown(evt) {
-      if(evt.key === "w") { 
+      if (evt.key === 'w') {
         let args = {
           p: initPosition,
           v: mp.v.mul(1.5).add(mouseDelta.unit.mul(Math.random()*5 + 10)),
           mass: 150,
           color: mp.color,
-          type: 'bullet'
+          type: 'player'
         }
-        this.bullets.push()
+        this.bullets.push(new Bullet(args));
       }
     }
   }
