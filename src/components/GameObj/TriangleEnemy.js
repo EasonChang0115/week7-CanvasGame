@@ -25,7 +25,7 @@ class TriangleEnemy extends GameObject {
       let shadowRb = this.r + 8;
       ctx.save();
         ctx.beginPath();
-        ctx.translate(0 - 8 * Math.cos(this.direction), 0 - 8 * Math.sin(this.direction));
+        ctx.translate(0 + 8 * Math.cos(this.direction), 0 + 8 * Math.sin(this.direction));
         ctx.moveTo(shadowRb * Math.cos(0), shadowRb * Math.sin(0));
         ctx.lineTo(shadowRb * Math.cos(Math.PI * 2 / 3), shadowRb * Math.sin(Math.PI * 2 / 3));
         ctx.lineTo(shadowRb * Math.cos(Math.PI * 4 / 3), shadowRb * Math.sin(Math.PI * 4 / 3));

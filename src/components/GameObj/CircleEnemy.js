@@ -9,7 +9,8 @@ class CircleEnemy extends GameObject {
     let def = {
       type: 'circle',
       r: 30,
-      speed: 2
+      speed: 2,
+      bulletFreq: 40
     };
     Object.assign(def, args);
     Object.assign(this, def);
@@ -18,12 +19,12 @@ class CircleEnemy extends GameObject {
     let ctx = this.ctx;
     ctx.save();
     if (this.type === 'circle') {
-      ctx.translate(this.p.x - this.r * Math.cos(this.direction), this.p.y - this.r * Math.sin(this.direction));
+      ctx.translate(this.p.x + this.r * Math.cos(this.direction), this.p.y + this.r * Math.sin(this.direction));
       // 透明大圓
       let shadowRb = this.r + 8;
       ctx.save();
         ctx.beginPath();
-        ctx.translate(0 - 8 * Math.cos(this.direction), 0 - 8 * Math.sin(this.direction));
+        ctx.translate(0 + 8 * Math.cos(this.direction), 0 + 8 * Math.sin(this.direction));
         ctx.arc(0, 0, shadowRb, 0, Math.PI * 2);
         ctx.globalAlpha = 0.2;
         ctx.fillStyle = global.color.yellow;
@@ -32,7 +33,7 @@ class CircleEnemy extends GameObject {
       // 透明小圓
       let shadowRs = this.r - 15;
       ctx.save();
-        ctx.translate(0 + 32.5 * Math.cos(this.direction), 0 + 32.5 * Math.sin(this.direction));
+        ctx.translate(0 - 32.5 * Math.cos(this.direction), 0 - 32.5 * Math.sin(this.direction));
         ctx.beginPath();
         ctx.arc(0, 0, shadowRs, 0, Math.PI * 2);
         ctx.globalAlpha = 0.2;

@@ -8,6 +8,8 @@ class Players extends GameObject {
       color: 'white',
       r: 75 / 2,
       defendR: 90,
+      defendDeg: 135,
+      defendArc: 90,
       dotR: 70,
       bulletSpeed: 1
     };
@@ -70,9 +72,9 @@ class Players extends GameObject {
     ctx.restore();
     // 繪製防護盾
     ctx.save();
-    ctx.rotate(this.direction + Math.PI);
+    ctx.rotate(this.direction);
     ctx.beginPath();
-    ctx.arc(0, 0, this.defendR, -Math.PI / 3 / 2, Math.PI / 3 / 2);
+    ctx.arc(0, 0, this.defendR, this.defendDeg * Math.PI / 180, (this.defendDeg + this.defendArc) * Math.PI / 180);
     ctx.lineWidth = 6;
     ctx.strokeStyle = this.color;
     ctx.stroke();

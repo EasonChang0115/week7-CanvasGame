@@ -34,7 +34,7 @@ class MeteoriteEnemy extends GameObject {
       // 陰影
       ctx.save();
         ctx.beginPath();
-        ctx.translate(0 + 20 * Math.cos(this.direction), 0 + 20 * Math.sin(this.direction));
+        ctx.translate(0 - 20 * Math.cos(this.direction), 0 - 20 * Math.sin(this.direction));
         ctx.arc(0, 0, this.r, 0, Math.PI * 2);
         ctx.globalAlpha = 0.2;
         ctx.fillStyle = global.color.red;

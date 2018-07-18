@@ -154,7 +154,6 @@ export default {
       this.enemys.forEach(enemy => {
         enemy.draw();
       });
-     
       ctx.restore();
       // --------------------------
       // 滑鼠繪製
@@ -186,7 +185,7 @@ export default {
 
       this.enemys.forEach(enemy => {
         enemy.update();
-        enemy.direction = this.player.p.sub(enemy.p).unit.angle;
+        enemy.direction = enemy.p.sub(this.player.p).unit.angle;
         let distanceToP = enemy.p.sub(this.player.p).length;
         if (distanceToP !== global.maxR) {
           let delta = enemy.p.sub(this.player.p);
@@ -203,10 +202,10 @@ export default {
           let newY = global.maxR * Math.sin(deltaA * Math.PI / 180);
           TweenMax.to(enemy.p, 0.15, {x: newX, y: newY});
         }
-        if (enemy.type === 'circle' && this.time % 40 === 0) {
+        // 圓形敵人發射子彈
+        if (enemy.type === 'circle' && this.time % enemy.bulletFreq === 0) {
           let initPosition = enemy.p.clone();
           let initV = this.player.p.sub(enemy.p).unit.mul(enemy.speed * 4);
-          console.log(initV);
           let args = {
             ctx: this.ctx,
             p: initPosition,
@@ -226,7 +225,7 @@ export default {
       this.enemyBullets.forEach(enemyBullet => {
         enemyBullet.update();
       });
-      //  偵測碰撞
+      //  偵測玩家子彈碰撞
       if (this.bullets.length > 0) {
         this.bullets.forEach(bullet => {
           this.enemys.forEach(enemy => {
@@ -238,6 +237,19 @@ export default {
           });
         });
       }
+      // 敵人子彈是否打到防護罩
+      if (this.enemyBullets.length > 0) {
+        this.enemyBullets.forEach(enemyBullet => {
+          let enemyBulletDeg = enemyBullet.direction * 180 / Math.PI >= 0 ? enemyBullet.direction * 180 / Math.PI : enemyBullet.direction * 180 / Math.PI + 360;
+          let defendDegS = (this.player.direction * 180 / Math.PI >=0 ? this.player.direction * 180 / Math.PI : this.player.direction * 180 / Math.PI + 360) + this.player.defendDeg;
+          let defendDegE = defendDegS + this.player.defendArc;
+          let enemyBulletDis = enemyBullet.p.sub(this.player.p).length;
+          if (enemyBulletDeg - defendDegS > 0 && enemyBulletDeg - defendDegE < 0 && !enemyBullet.isDead && enemyBulletDis < this.player.defendR) {
+            enemyBullet.isDead = true;
+          }
+        });
+      }
+      this.enemyBullets = this.enemyBullets.filter(enemyBullet => !enemyBullet.isDead);
       this.bullets = this.bullets.filter(bullet => !bullet.isDead);
       this.enemys = this.enemys.filter(enemy => !enemy.isDead);
     },
@@ -276,7 +288,7 @@ export default {
       // console.log(this.mousePosDown);
     },
     keydown(evt) {
-      if (evt.key === 'w') {
+      if (evt.key === 'w' && this.time % 12 === 0) {
         let initPosition = this.player.p.add(new Vec2(this.player.dotR * Math.cos(this.player.v.unit.angle), this.player.dotR * Math.sin(this.player.v.unit.angle)));
         let initV = this.player.v;
         let args = {

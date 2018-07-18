@@ -16,22 +16,21 @@ class Bullet extends GameObject {
     const ctx = this.ctx;
     if (!this.isDead) {
       ctx.save();
-      ctx.translate(this.p.x, this.p.y);
       if (this.type === 'player') {
+        ctx.translate(this.p.x, this.p.y);
         ctx.beginPath();
         ctx.arc(0, 0, this.r, 0, Math.PI * 2);
         ctx.fillStyle = this.color;
         ctx.fill();
       }
       if (this.type === 'enemy-circle') {
-        ctx.save();
-        ctx.translate(0 - Math.cos(this.direction), 0 - Math.sin(this.direction));
+        ctx.translate(this.p.x, this.p.y);
+        ctx.rotate(this.direction);
         ctx.beginPath();
         ctx.scale(1, 0.5);
         ctx.arc(0, 0, this.r, 0, Math.PI * 2);
         ctx.fillStyle = this.color;
         ctx.fill();
-        ctx.restore();
       }
       ctx.restore();
     }
