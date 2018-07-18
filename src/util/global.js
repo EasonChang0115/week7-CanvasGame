@@ -9,7 +9,7 @@ const global = {
     bgBlue: '#001D2E'
   },
   Levels: [{
-    enemys: ['circle', 'triangle', 'meteorite']
+    enemys: ['circle']
   }, {
     enemys: ['circle', 'triangle', 'circle', 'triangle']
   }, {

@@ -1,6 +1,46 @@
 <template>
   <div class="main">
     <canvas id="mycanvas"></canvas>
+    <div class="panel">
+      <div class="logo">
+        <div class="logo-img" :style="{backgroundImage: 'url(./static/image/logo.svg)'}"></div>
+        <div class="text">RADIO Defense</div>
+      </div>
+      <div class="life">
+        <div class="energy-bar">
+          <div class="inner" :style="{width: `${energy}%`}"></div>
+        </div>
+        <div class="hearts">
+          <div class="heart" v-for="i in life" :key="i">
+            <i class="fas fa-heart"></i>
+          </div>
+        </div>
+      </div>
+      <div class="score">
+        <div class="battery">
+          <div class="head"></div>
+          <div class="body">
+            <i class="fas fa-bolt"></i>
+          </div>
+          <div class="bottom"></div>
+        </div>
+        <div class="ifor">
+          <span>已回收</span>
+          <br>
+          {{ score }} 個能量電池
+        </div>
+      </div>
+      <div class="buttons">
+        <div class="block">
+          <div class="button shop">S</div>
+          <div class="des">Shop</div>
+        </div>
+        <div class="block">
+          <div class="button stop">P</div>
+          <div class="des">Pause</div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -18,6 +58,9 @@ export default {
   name: 'Main',
   data () {
     return {
+      score: 0,
+      energy: 100,
+      life: 3,
       canvas: null,
       ctx: null,
       ww: 0,
@@ -28,6 +71,7 @@ export default {
       level: 0,
       enemys: [],
       bullets: [],
+      enemyBullets: [],
       mousePos: new Vec2(0, 0),
       mousePosDown: new Vec2(0, 0),
       mousePosUp: new Vec2(0, 0)
@@ -45,7 +89,7 @@ export default {
     };
     this.player = new Player({ctx: this.ctx});
     this.enemys = global.Levels[this.level].enemys.map(enemy => {
-      let randomAngle = Math.random() * 360;
+      let randomAngle = Math.random() * 360 * Math.PI / 180;
       let x = global.maxR * 1.5 * Math.cos(randomAngle);
       let y = global.maxR * 1.5 * Math.sin(randomAngle);
       if (enemy === 'circle') {
@@ -97,11 +141,20 @@ export default {
       ctx.save();
       ctx.translate(this.ww / 2, this.wh / 2);
       ctx.translate(-center.x, -center.y);
+      
       this.drawLine();
+       this.bullets.forEach(bullet => {
+        bullet.draw();
+      });
+      this.enemyBullets.forEach(bullet => {
+        bullet.draw();
+      });
+
       this.player.draw();
       this.enemys.forEach(enemy => {
         enemy.draw();
       });
+     
       ctx.restore();
       // --------------------------
       // 滑鼠繪製
@@ -134,17 +187,59 @@ export default {
       this.enemys.forEach(enemy => {
         enemy.update();
         enemy.direction = this.player.p.sub(enemy.p).unit.angle;
-        if (enemy.p.sub(this.player.p).length !== global.maxR) {
+        let distanceToP = enemy.p.sub(this.player.p).length;
+        if (distanceToP !== global.maxR) {
           let delta = enemy.p.sub(this.player.p);
           let newV = delta.unit.mul(global.maxR);
-          TweenMax.to(enemy.p, 2, {x: newV.x, y: newV.y});
+          TweenMax.to(enemy.p, 1, {x: newV.x, y: newV.y});
         }
-        // if (Math.abs(enemy.p.sub(this.player.p).length - global.maxR) < 2) {
-        //   let randomAngleV = Math.random * 720 - 360;
-        //   let tangV = new Vec2(global.maxR * Math.cos(randomAngleV * Math.PI * 2), global.maxR * Math.sin(randomAngleV * Math.PI * 2));
-        //   enemy.v = tangV.unit.mul(enemy.speed);
-        // }
+        if (distanceToP - global.maxR < 2) {
+          let vdirection = enemy.p.sub(this.player.p).unit.angle;
+          let deltaA = parseInt(vdirection * 180 / Math.PI) - enemy.speed;
+          if (this.time % 100 > 70) {
+            deltaA = parseInt(vdirection * 180 / Math.PI) + enemy.speed;
+          }
+          let newX = global.maxR * Math.cos(deltaA * Math.PI / 180);
+          let newY = global.maxR * Math.sin(deltaA * Math.PI / 180);
+          TweenMax.to(enemy.p, 0.15, {x: newX, y: newY});
+        }
+        if (enemy.type === 'circle' && this.time % 120 === 0) {
+          let initPosition = enemy.p.clone();
+          let initV = this.player.p.sub(enemy.p).unit.mul(enemy.speed * 4);
+          console.log(initV);
+          let args = {
+            ctx: this.ctx,
+            p: initPosition,
+            v: initV,
+            color: global.color.yellow,
+            direction: enemy.direction,
+            type: 'enemy-circle',
+            isDead: false
+          };
+          this.enemyBullets.push(new Bullet(args));
+        }
       });
+      this.bullets.forEach(bullet => {
+        bullet.update();
+      });
+
+      this.enemyBullets.forEach(enemyBullet => {
+        enemyBullet.update();
+      });
+      //  偵測碰撞
+      if (this.bullets.length > 0) {
+        this.bullets.forEach(bullet => {
+          this.enemys.forEach(enemy => {
+            if (bullet.collide(enemy)) {
+              bullet.isDead = true;
+              enemy.isDead = true;
+              this.score += 1;
+            }
+          });
+        });
+      }
+      this.bullets = this.bullets.filter(bullet => !bullet.isDead);
+      this.enemys = this.enemys.filter(enemy => !enemy.isDead);
     },
     load() {
       this.gameInit();
@@ -182,12 +277,15 @@ export default {
     },
     keydown(evt) {
       if (evt.key === 'w') {
+        let initPosition = this.player.p.add(new Vec2(this.player.dotR * Math.cos(this.player.v.unit.angle), this.player.dotR * Math.sin(this.player.v.unit.angle)));
+        let initV = this.player.v;
         let args = {
-          // p: initPosition,
-          // v: mp.v.mul(1.5).add(mouseDelta.unit.mul(Math.random()*5 + 10)),
-          // mass: 150,
-          // color: mp.color,
-          type: 'player'
+          ctx: this.ctx,
+          p: initPosition,
+          v: initV,
+          color: 'white',
+          type: 'player',
+          isDead: false
         };
         this.bullets.push(new Bullet(args));
       }

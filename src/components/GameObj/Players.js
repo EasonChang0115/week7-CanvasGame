@@ -9,7 +9,7 @@ class Players extends GameObject {
       r: 75 / 2,
       defendR: 90,
       dotR: 70,
-      isDead: false
+      bulletSpeed: 1
     };
     Object.assign(def, args);
     Object.assign(this, def);

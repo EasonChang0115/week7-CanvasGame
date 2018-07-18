@@ -1,4 +1,5 @@
 import Vec2 from '../Canvas/Vector.js';
+import global from '../../util/global.js';
 
 class GameObject {
   constructor(args) {
@@ -8,7 +9,8 @@ class GameObject {
       v: Vec2.ZERO,
       a: Vec2.ZERO,
       speed: 4,
-      direction: Vec2.ZERO
+      direction: Vec2.ZERO,
+      isDead: false
     };
     Object.assign(def, args);
     Object.assign(this, def);

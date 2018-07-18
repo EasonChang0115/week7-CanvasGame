@@ -8,7 +8,8 @@ class CircleEnemy extends GameObject {
     super(args);
     let def = {
       type: 'circle',
-      r: 30
+      r: 30,
+      speed: 2
     };
     Object.assign(def, args);
     Object.assign(this, def);

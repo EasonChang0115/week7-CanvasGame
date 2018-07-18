@@ -10,7 +10,8 @@ class MeteoriteEnemy extends GameObject {
     let def = {
       type: 'triangle',
       r: 35,
-      direction: new Vec2(0, 0)
+      direction: new Vec2(0, 0),
+      speed: 1.5
     };
     Object.assign(def, args);
     Object.assign(this, def);
