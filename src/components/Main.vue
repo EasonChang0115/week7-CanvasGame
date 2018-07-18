@@ -141,7 +141,7 @@ export default {
       ctx.save();
       ctx.translate(this.ww / 2, this.wh / 2);
       ctx.translate(-center.x, -center.y);
-      
+
       this.drawLine();
        this.bullets.forEach(bullet => {
         bullet.draw();
@@ -203,7 +203,7 @@ export default {
           let newY = global.maxR * Math.sin(deltaA * Math.PI / 180);
           TweenMax.to(enemy.p, 0.15, {x: newX, y: newY});
         }
-        if (enemy.type === 'circle' && this.time % 120 === 0) {
+        if (enemy.type === 'circle' && this.time % 40 === 0) {
           let initPosition = enemy.p.clone();
           let initV = this.player.p.sub(enemy.p).unit.mul(enemy.speed * 4);
           console.log(initV);
