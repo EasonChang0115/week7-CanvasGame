@@ -99,6 +99,19 @@
   animation-name: fadeIn;
 }
 
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+.fadeOut {
+  animation: fadeOut 1.5s;
+}
+
 .pagefadeIn {
   animation-duration: 1s;
   animation-name: fadeIn;

@@ -8,7 +8,7 @@ class MeteoriteEnemy extends GameObject {
   constructor(args) {
     super(args);
     let def = {
-      type: 'triangle',
+      type: 'meteorite',
       r: 35,
       direction: new Vec2(0, 0),
       speed: 1.5
@@ -77,7 +77,9 @@ class MeteoriteEnemy extends GameObject {
       this.p.y = global.height / 2 - this.r;
     }
   }
-  collide(gobj) {}
+  collide(gobj) {
+    return this.p.sub(gobj.p).length < this.r + gobj.r;
+  }
 }
 
 export default MeteoriteEnemy;

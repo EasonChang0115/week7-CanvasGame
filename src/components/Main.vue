@@ -1,6 +1,37 @@
 <template>
   <div class="main">
     <canvas id="mycanvas"></canvas>
+    <div class="start-panel" :style="{display: start ? 'none' : ''}">
+      <div class="circle-run">
+        <div class="ball-scale-multiple">
+          <div></div>
+          <div></div>
+          <div></div>
+        </div>
+      </div>
+      <div class="block">
+        <div class="center">
+          <div class="logo">
+            <div class="battery-img" :style="{backgroundImage: 'url(./static/image/battery.svg)'}"></div>
+            <div class="logo-img" :style="{backgroundImage: 'url(./static/image/logo.svg)'}"></div>
+          </div>
+          <div class="text">Radio Defense</div>
+          <button class="btn" @click="GameStart">Start Game</button>
+        </div>
+        <div class="game-text">
+          <p>
+            你身負著運送能量電池的任務
+            <br>
+            卻遭到幾何星人的埋伏
+            <br>
+            請協助從他們的手中奪回能量電池
+          </p>
+        </div>
+        <div class="circle-img" :style="{backgroundImage: 'url(./static/image/circle.svg)'}"></div>
+        <div class="triangle-img" :style="{backgroundImage: 'url(./static/image/triangle.svg)'}"></div>
+        <div class="meteorite-img" :style="{backgroundImage: 'url(./static/image/meteorite.svg)'}"></div>
+      </div>
+    </div>
     <div class="panel">
       <div class="logo">
         <div class="logo-img" :style="{backgroundImage: 'url(./static/image/logo.svg)'}"></div>
@@ -35,9 +66,23 @@
           <div class="button shop">S</div>
           <div class="des">Shop</div>
         </div>
-        <div class="block">
+        <div class="block" :class="pause ? 'pause' : ''">
           <div class="button stop">P</div>
           <div class="des">Pause</div>
+        </div>
+      </div>
+    </div>
+    <div class="end-panel fadeIn" :style="{display: isGameover ? 'flex' : 'none'}">
+      <div class="out-block">
+        <div class="block">
+          <div class="left">
+            <div class="battery-img" :style="{backgroundImage: 'url(./static/image/battery.svg)'}"></div>
+          </div>
+          <div class="right">
+            <div class="little-text">你回收了</div>
+            <div class="text">{{ score }}個能量電池</div>
+            <button class="btn" @click="gameInit">Restart</button>
+          </div>
         </div>
       </div>
     </div>
@@ -62,6 +107,8 @@ export default {
       energy: 100,
       life: 3,
       pause: false,
+      isGameover: false,
+      start: false,
       canvas: null,
       ctx: null,
       ww: 0,
@@ -89,7 +136,6 @@ export default {
       this.lineTo(v2.x, v2.y);
     };
     this.player = new Player({ctx: this.ctx});
-    this.generateEnemys(this.level);
     this.initCanvas();
     this.load();
     window.addEventListener('resize', this.initCanvas);
@@ -105,7 +151,16 @@ export default {
       this.ww = this.canvas.width = window.innerWidth;
       this.wh = this.canvas.height = window.innerHeight;
     },
-    gameInit() {},
+    gameInit() {
+      this.score = 0;
+      this.energy = 100;
+      this.life = 3;
+      this.isGameover = false;
+      this.start = false;
+      this.pause = false;
+      this.level = 0;
+      this.enemys = [];
+    },
     render() {
       let ctx = this.ctx;
       // 清空背景
@@ -150,6 +205,9 @@ export default {
       requestAnimationFrame(this.render);
     },
     update() {
+      if (this.pause) return;
+      if (this.isGameover) return;
+      if (!this.start) return;
       this.time++;
       this.player.update();
       let delta = this.mousePos.sub(new Vec2(this.ww / 2, this.wh / 2)).mul(0.1);
@@ -159,25 +217,30 @@ export default {
       }
       this.player.v = delta;
 
-      this.enemys.forEach(enemy => {
+      this.enemys.forEach((enemy, index) => {
         enemy.update();
         enemy.direction = enemy.p.sub(this.player.p).unit.angle;
-        let distanceToP = enemy.p.sub(this.player.p).length;
-        if (distanceToP !== global.maxR) {
-          let delta = enemy.p.sub(this.player.p);
-          let newV = delta.unit.mul(global.maxR);
-          TweenMax.to(enemy.p, 1, {x: newV.x, y: newV.y});
-        }
-        // 隨機移動位置
-        if (distanceToP - global.maxR < 2) {
-          let vdirection = enemy.p.sub(this.player.p).unit.angle;
-          let deltaA = parseInt(vdirection * 180 / Math.PI) - enemy.speed;
-          if (this.time % 100 > 70) {
-            deltaA = parseInt(vdirection * 180 / Math.PI) + enemy.speed;
+        if (enemy.type !== 'meteorite') {
+          let distanceToP = enemy.p.sub(this.player.p).length;
+          if (distanceToP !== global.maxR) {
+            let delta = enemy.p.sub(this.player.p);
+            let newV = delta.unit.mul(global.maxR);
+            TweenMax.to(enemy.p, 1, {x: newV.x, y: newV.y});
           }
-          let newX = global.maxR * Math.cos(deltaA * Math.PI / 180);
-          let newY = global.maxR * Math.sin(deltaA * Math.PI / 180);
-          TweenMax.to(enemy.p, 0.15, {x: newX, y: newY});
+          // 隨機移動位置
+          if (distanceToP - global.maxR < 2) {
+            let vdirection = enemy.p.sub(this.player.p).unit.angle;
+            let deltaA = parseInt(vdirection * 180 / Math.PI) - enemy.speed;
+            if (this.time % 100 > 70) {
+              deltaA = parseInt(vdirection * 180 / Math.PI) + enemy.speed;
+            }
+            let newX = global.maxR * Math.cos(deltaA * Math.PI / 180);
+            let newY = global.maxR * Math.sin(deltaA * Math.PI / 180);
+            TweenMax.to(enemy.p, 0.15, {x: newX, y: newY});
+          }
+        } else if (enemy.type === 'meteorite') {
+          let newV = delta.unit.mul(1);
+          TweenMax.to(enemy.p, index * 2.5 + 10, {x: newV.x, y: newV.y});
         }
         // 圓形敵人發射子彈
         if (enemy.type === 'circle' && this.time % enemy.bulletFreq === 0) {
@@ -193,6 +256,10 @@ export default {
             isDead: false
           };
           this.enemyBullets.push(new Bullet(args));
+        }
+        if (enemy.collide(this.player)) {
+          enemy.isDead = true;
+          this.lifeHurt(50);
         }
       });
       this.bullets.forEach(bullet => {
@@ -214,9 +281,10 @@ export default {
           });
         });
       }
-      // 敵人子彈是否打到防護罩
+      // 敵人子彈是否打到防護罩 && 是否打到玩家
       if (this.enemyBullets.length > 0) {
         this.enemyBullets.forEach(enemyBullet => {
+          // 敵人子彈是否打到防護罩
           let enemyBulletDeg = enemyBullet.direction * 180 / Math.PI >= 0 ? enemyBullet.direction * 180 / Math.PI : enemyBullet.direction * 180 / Math.PI + 360;
           let defendDegS = this.player.direction * 180 / Math.PI + this.player.defendDeg;
           defendDegS = defendDegS > 0 ? defendDegS : defendDegS + 360;
@@ -238,14 +306,37 @@ export default {
           if ((deltaS + deltaE) <= this.player.defendArc && !enemyBullet.isDead && enemyBulletDis < this.player.defendR) {
             enemyBullet.isDead = true;
           }
+          // 是否打到玩家
+          if (enemyBullet.collide(this.player)) {
+            enemyBullet.isDead = true;
+            this.lifeHurt(25);
+          }
         });
+      }
+      // 玩家血量和能量控制
+      if (this.energy < 100 && this.time % 30 === 0) {
+        this.energy++;
+      }
+      if (this.energy === 0 && this.life > 0) {
+        this.energy = 100;
+        this.life -= 1;
+      }
+      if (this.energy === 0 && this.life === 0) {
+        this.isGameover = true;
+      }
+      if (this.enemys.length === 0) {
+        if (this.level === 2) {
+          this.level = 0;
+        } else {
+          this.level += 1;
+        }
+        this.generateEnemys(this.level);
       }
       this.enemyBullets = this.enemyBullets.filter(enemyBullet => !enemyBullet.isDead);
       this.bullets = this.bullets.filter(bullet => !bullet.isDead);
       this.enemys = this.enemys.filter(enemy => !enemy.isDead);
     },
     load() {
-      this.gameInit();
       this.initCanvas();
       requestAnimationFrame(this.render);
       setInterval(this.update, 1000 / this.updateFPS);
@@ -307,7 +398,7 @@ export default {
       // console.log(this.mousePosDown);
     },
     keydown(evt) {
-      if (evt.key === 'w' && this.time % 12 === 0) {
+      if (evt.key === 'w') {
         let initPosition = this.player.p.add(new Vec2(this.player.dotR * Math.cos(this.player.v.unit.angle), this.player.dotR * Math.sin(this.player.v.unit.angle)));
         let initV = this.player.v;
         let args = {
@@ -320,6 +411,21 @@ export default {
         };
         this.bullets.push(new Bullet(args));
       }
+      if (evt.key === 'p') {
+        this.pause = !this.pause;
+      }
+    },
+    lifeHurt(demage) {
+      let newEnergy = this.energy - demage;
+      if (newEnergy < 0) {
+        this.energy = 0;
+      } else {
+        this.energy = newEnergy;
+      }
+    },
+    GameStart() {
+      this.start = true;
+      this.generateEnemys(this.level);
     }
   }
 };
