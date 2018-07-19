@@ -61,6 +61,7 @@ export default {
       score: 0,
       energy: 100,
       life: 3,
+      pause: false,
       canvas: null,
       ctx: null,
       ww: 0,
@@ -88,32 +89,7 @@ export default {
       this.lineTo(v2.x, v2.y);
     };
     this.player = new Player({ctx: this.ctx});
-    this.enemys = global.Levels[this.level].enemys.map(enemy => {
-      let randomAngle = Math.random() * 360 * Math.PI / 180;
-      let x = global.maxR * 1.5 * Math.cos(randomAngle);
-      let y = global.maxR * 1.5 * Math.sin(randomAngle);
-      if (enemy === 'circle') {
-         return new CircleEnemy({
-          ctx: this.ctx,
-          p: new Vec2(x, y),
-          type: enemy
-        });
-      }
-      if (enemy === 'triangle') {
-         return new TriangleEnemy({
-          ctx: this.ctx,
-          p: new Vec2(x, y),
-          type: enemy
-        });
-      }
-      if (enemy === 'meteorite') {
-         return new MeteoriteEnemy({
-          ctx: this.ctx,
-          p: new Vec2(x, y),
-          type: enemy
-        });
-      }
-    });
+    this.generateEnemys(this.level);
     this.initCanvas();
     this.load();
     window.addEventListener('resize', this.initCanvas);
@@ -192,6 +168,7 @@ export default {
           let newV = delta.unit.mul(global.maxR);
           TweenMax.to(enemy.p, 1, {x: newV.x, y: newV.y});
         }
+        // 隨機移動位置
         if (distanceToP - global.maxR < 2) {
           let vdirection = enemy.p.sub(this.player.p).unit.angle;
           let deltaA = parseInt(vdirection * 180 / Math.PI) - enemy.speed;
@@ -241,10 +218,24 @@ export default {
       if (this.enemyBullets.length > 0) {
         this.enemyBullets.forEach(enemyBullet => {
           let enemyBulletDeg = enemyBullet.direction * 180 / Math.PI >= 0 ? enemyBullet.direction * 180 / Math.PI : enemyBullet.direction * 180 / Math.PI + 360;
-          let defendDegS = (this.player.direction * 180 / Math.PI >=0 ? this.player.direction * 180 / Math.PI : this.player.direction * 180 / Math.PI + 360) + this.player.defendDeg;
+          let defendDegS = this.player.direction * 180 / Math.PI + this.player.defendDeg;
+          defendDegS = defendDegS > 0 ? defendDegS : defendDegS + 360;
+          let deltaS = 0;
+          if (Math.abs(enemyBulletDeg - defendDegS) > 180) {
+            deltaS = 360 - Math.abs(enemyBulletDeg - defendDegS);
+          } else {
+            deltaS = Math.abs(enemyBulletDeg - defendDegS);
+          }
           let defendDegE = defendDegS + this.player.defendArc;
+          defendDegE = defendDegE % 360;
+          let deltaE = 0;
+          if (Math.abs(enemyBulletDeg - defendDegE) > 180) {
+            deltaE = 360 - Math.abs(enemyBulletDeg - defendDegE);
+          } else {
+            deltaE = Math.abs(enemyBulletDeg - defendDegE);
+          }
           let enemyBulletDis = enemyBullet.p.sub(this.player.p).length;
-          if (enemyBulletDeg - defendDegS > 0 && enemyBulletDeg - defendDegE < 0 && !enemyBullet.isDead && enemyBulletDis < this.player.defendR) {
+          if ((deltaS + deltaE) <= this.player.defendArc && !enemyBullet.isDead && enemyBulletDis < this.player.defendR) {
             enemyBullet.isDead = true;
           }
         });
@@ -273,6 +264,34 @@ export default {
       }
       ctx.strokeStyle = 'rgba(255,255,255,0.1)';
       ctx.stroke();
+    },
+    generateEnemys(level) {
+      this.enemys = global.Levels[level].enemys.map(enemy => {
+        let randomAngle = Math.random() * 360 * Math.PI / 180;
+        let x = global.maxR * 1.5 * Math.cos(randomAngle);
+        let y = global.maxR * 1.5 * Math.sin(randomAngle);
+        if (enemy === 'circle') {
+          return new CircleEnemy({
+            ctx: this.ctx,
+            p: new Vec2(x, y),
+            type: enemy
+          });
+        }
+        if (enemy === 'triangle') {
+          return new TriangleEnemy({
+            ctx: this.ctx,
+            p: new Vec2(x, y),
+            type: enemy
+          });
+        }
+        if (enemy === 'meteorite') {
+          return new MeteoriteEnemy({
+            ctx: this.ctx,
+            p: new Vec2(x, y),
+            type: enemy
+          });
+        }
+      });
     },
     mouseMove(evt) {
       this.mousePos.set(evt.x, evt.y);
