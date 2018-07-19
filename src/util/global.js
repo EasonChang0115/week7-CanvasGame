@@ -9,9 +9,13 @@ const global = {
     bgBlue: '#001D2E'
   },
   Levels: [{
-    enemys: ['meteorite', 'meteorite', 'meteorite']
+    enemys: ['meteorite', 'meteorite']
   }, {
-    enemys: ['circle', 'triangle', 'circle', 'triangle']
+    enemys: ['meteorite', 'meteorite', 'circle']
+  }, {
+    enemys: ['meteorite', 'triangle', 'circle']
+  }, {
+    enemys: ['circle', 'triangle', 'meteorite', 'circle']
   }, {
     enemys: ['circle', 'triangle', 'meteorite', 'circle', 'triangle', 'meteorite']
   }]

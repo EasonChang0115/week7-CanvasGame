@@ -47,6 +47,9 @@
           </div>
         </div>
       </div>
+      <div class="level-time">
+        <div class="level">{{ `Wave ${level + 1}`}}</div>
+      </div>
       <div class="score">
         <div class="battery">
           <div class="head"></div>
@@ -96,6 +99,7 @@ import Player from './GameObj/Players.js';
 import CircleEnemy from './GameObj/CircleEnemy.js';
 import TriangleEnemy from './GameObj/TriangleEnemy.js';
 import MeteoriteEnemy from './GameObj/MeteoriteEnemy.js';
+import LittleMeteoriteEnemy from './GameObj/LittleMeteoriteEnemy.js';
 import Bullet from './GameObj/Bullet.js';
 import { TweenMax } from 'gsap';
 
@@ -220,7 +224,7 @@ export default {
       this.enemys.forEach((enemy, index) => {
         enemy.update();
         enemy.direction = enemy.p.sub(this.player.p).unit.angle;
-        if (enemy.type !== 'meteorite') {
+        if (enemy.type !== 'meteorite' && enemy.type !== 'littlemeteorite') {
           let distanceToP = enemy.p.sub(this.player.p).length;
           if (distanceToP !== global.maxR) {
             let delta = enemy.p.sub(this.player.p);
@@ -230,20 +234,22 @@ export default {
           // 隨機移動位置
           if (distanceToP - global.maxR < 2) {
             let vdirection = enemy.p.sub(this.player.p).unit.angle;
-            let deltaA = parseInt(vdirection * 180 / Math.PI) - enemy.speed;
-            if (this.time % 100 > 70) {
-              deltaA = parseInt(vdirection * 180 / Math.PI) + enemy.speed;
+            let deltaA = parseInt(vdirection * 180 / Math.PI) - enemy.speed * index / 3 - enemy.speed;
+            if (this.time % (100 * (index + 1) / 2) > 60) {
+              deltaA = parseInt(vdirection * 180 / Math.PI) + enemy.speed + enemy.speed / 3 * index;
             }
             let newX = global.maxR * Math.cos(deltaA * Math.PI / 180);
             let newY = global.maxR * Math.sin(deltaA * Math.PI / 180);
             TweenMax.to(enemy.p, 0.15, {x: newX, y: newY});
           }
         } else if (enemy.type === 'meteorite') {
-          let newV = delta.unit.mul(1);
-          TweenMax.to(enemy.p, index * 2.5 + 10, {x: newV.x, y: newV.y});
+          let delta = this.player.p.sub(enemy.p);
+          let newV = delta.unit.mul(enemy.speed);
+          // TweenMax.to(enemy.p, index * 2.5 + 10, {x: newV.x, y: newV.y});
+          enemy.v = newV;
         }
         // 圓形敵人發射子彈
-        if (enemy.type === 'circle' && this.time % enemy.bulletFreq === 0) {
+        if (enemy.type === 'circle' && this.time % (enemy.bulletFreq + (index * enemy.bulletFreq * 0.5)) === 0) {
           let initPosition = enemy.p.clone();
           let initV = this.player.p.sub(enemy.p).unit.mul(enemy.speed * 4);
           let args = {
@@ -253,6 +259,21 @@ export default {
             color: global.color.yellow,
             direction: enemy.direction,
             type: 'enemy-circle',
+            isDead: false
+          };
+          this.enemyBullets.push(new Bullet(args));
+        }
+        // 三角形敵人發射子彈
+        if (enemy.type === 'triangle' && this.time % (enemy.bulletFreq + (index * enemy.bulletFreq * 0.5)) === 0) {
+           let initPosition = enemy.p.clone();
+          let initV = this.player.p.sub(enemy.p).unit.mul(enemy.speed * 4);
+          let args = {
+            ctx: this.ctx,
+            p: initPosition,
+            v: initV,
+            color: global.color.blue,
+            direction: enemy.direction,
+            type: 'enemy-traingle',
             isDead: false
           };
           this.enemyBullets.push(new Bullet(args));
@@ -276,6 +297,23 @@ export default {
             if (bullet.collide(enemy)) {
               bullet.isDead = true;
               enemy.isDead = true;
+              if (enemy.type === 'meteorite') {
+                let newV = enemy.v;
+                let newMeteorite1 = new LittleMeteoriteEnemy({
+                  ctx: this.ctx,
+                  p: enemy.p.clone(),
+                  v: newV.clone()
+                });
+                let newMeteorite2 = new LittleMeteoriteEnemy({
+                  ctx: this.ctx,
+                  p: enemy.p.clone(),
+                  v: newV.clone()
+                });
+                this.enemys.push(newMeteorite1);
+                this.enemys.push(newMeteorite2);
+                TweenMax.to(newMeteorite1.p, 1, {x: enemy.p.x + Math.random() * 150, y: enemy.p.y + Math.random() * 260});
+                TweenMax.to(newMeteorite2.p, 1, {x: enemy.p.x + Math.random() * 150, y: enemy.p.y + Math.random() * 260});
+              }
               this.score += 1;
             }
           });
@@ -306,6 +344,12 @@ export default {
           if ((deltaS + deltaE) <= this.player.defendArc && !enemyBullet.isDead && enemyBulletDis < this.player.defendR) {
             enemyBullet.isDead = true;
           }
+          if (enemyBullet.type === 'enemy-traingle' && Math.random() < 0.1) {
+            let angle = Math.PI * 2 * Math.random();
+            let len = enemyBullet.speed;
+            let newV = new Vec2(Math.cos(angle) * len, Math.sin(angle) * len);
+            enemyBullet.v = newV;
+          }
           // 是否打到玩家
           if (enemyBullet.collide(this.player)) {
             enemyBullet.isDead = true;
@@ -325,7 +369,9 @@ export default {
         this.isGameover = true;
       }
       if (this.enemys.length === 0) {
-        if (this.level === 2) {
+        this.bullets = [];
+        this.enemyBullets = [];
+        if (this.level === (global.Levels.length - 1)) {
           this.level = 0;
         } else {
           this.level += 1;

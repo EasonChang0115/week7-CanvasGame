@@ -32,6 +32,17 @@ class Bullet extends GameObject {
         ctx.fillStyle = this.color;
         ctx.fill();
       }
+      if (this.type === 'enemy-traingle') {
+        ctx.translate(this.p.x, this.p.y);
+        ctx.rotate(this.direction);
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.lineTo(10, 0);
+        ctx.lineTo(0, 10);
+        ctx.closePath();
+        ctx.fillStyle = this.color;
+        ctx.fill();
+      }
       ctx.restore();
     }
   }

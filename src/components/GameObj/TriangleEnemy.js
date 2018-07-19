@@ -11,6 +11,7 @@ class TriangleEnemy extends GameObject {
       type: 'triangle',
       r: 35,
       direction: new Vec2(0, 0),
+      bulletFreq: 80,
       speed: 4
     };
     Object.assign(def, args);
