@@ -484,7 +484,7 @@ export default {
     keydown(evt) {
       if (evt.key === 'w') {
         let initPosition = this.player.p.add(new Vec2(this.player.dotR * Math.cos(this.player.v.unit.angle), this.player.dotR * Math.sin(this.player.v.unit.angle)));
-        let initV = this.player.v;
+        let initV = this.player.v.mul(2.5);
         let args = {
           ctx: this.ctx,
           p: initPosition,
