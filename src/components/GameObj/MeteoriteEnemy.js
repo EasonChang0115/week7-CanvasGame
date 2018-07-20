@@ -77,9 +77,6 @@ class MeteoriteEnemy extends GameObject {
       this.p.y = global.height / 2 - this.r;
     }
   }
-  collide(gobj) {
-    return this.p.sub(gobj.p).length < this.r + gobj.r;
-  }
 }
 
 export default MeteoriteEnemy;

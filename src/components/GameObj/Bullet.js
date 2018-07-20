@@ -67,9 +67,6 @@ class Bullet extends GameObject {
       this.isDead = true;
     }
   }
-  collide(gobj) {
-    return this.p.sub(gobj.p).length < this.r + gobj.r;
-  }
 }
 
 export default Bullet;

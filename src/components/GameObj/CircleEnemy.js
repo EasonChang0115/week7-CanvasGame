@@ -79,9 +79,6 @@ class CircleEnemy extends GameObject {
     this.p.move(this.v.x, this.v.y);
     this.checkBoundary();
   }
-  collide(gobj) {
-    return this.p.sub(gobj.p).length < this.r + gobj.r;
-  }
 }
 
 export default CircleEnemy;

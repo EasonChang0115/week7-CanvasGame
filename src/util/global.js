@@ -8,6 +8,7 @@ const global = {
     blue: '#3676BB',
     bgBlue: '#001D2E'
   },
+  Props: ['defend', 'heart'],
   Levels: [{
     enemys: ['meteorite', 'meteorite']
   }, {

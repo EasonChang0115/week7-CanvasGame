@@ -101,6 +101,7 @@ import TriangleEnemy from './GameObj/TriangleEnemy.js';
 import MeteoriteEnemy from './GameObj/MeteoriteEnemy.js';
 import LittleMeteoriteEnemy from './GameObj/LittleMeteoriteEnemy.js';
 import Bullet from './GameObj/Bullet.js';
+import Prop from './GameObj/Prop.js';
 import { TweenMax } from 'gsap';
 
 export default {
@@ -124,6 +125,7 @@ export default {
       enemys: [],
       bullets: [],
       enemyBullets: [],
+      props: [],
       mousePos: new Vec2(0, 0),
       mousePosDown: new Vec2(0, 0),
       mousePosUp: new Vec2(0, 0)
@@ -189,6 +191,9 @@ export default {
       this.enemys.forEach(enemy => {
         enemy.draw();
       });
+      this.props.forEach(prop => {
+        prop.draw();
+      });
       ctx.restore();
       // --------------------------
       // 滑鼠繪製
@@ -214,6 +219,7 @@ export default {
       if (!this.start) return;
       this.time++;
       this.player.update();
+      // 處理玩家方向
       let delta = this.mousePos.sub(new Vec2(this.ww / 2, this.wh / 2)).mul(0.1);
       let deltaLen = delta.length;
       if (deltaLen > this.player.speed) {
@@ -221,6 +227,7 @@ export default {
       }
       this.player.v = delta;
 
+      // 處理敵人更新
       this.enemys.forEach((enemy, index) => {
         enemy.update();
         enemy.direction = enemy.p.sub(this.player.p).unit.angle;
@@ -283,14 +290,15 @@ export default {
           this.lifeHurt(50);
         }
       });
+      // 處理玩家子彈更新
       this.bullets.forEach(bullet => {
         bullet.update();
       });
-
+      // 處理敵人子彈更新
       this.enemyBullets.forEach(enemyBullet => {
         enemyBullet.update();
       });
-      //  偵測玩家子彈碰撞
+      // 偵測玩家子彈碰撞
       if (this.bullets.length > 0) {
         this.bullets.forEach(bullet => {
           this.enemys.forEach(enemy => {
@@ -357,9 +365,38 @@ export default {
           }
         });
       }
+      // 隨機新增道具
+      if (Math.random() * 350 < 1) {
+        this.addProps();
+      }
+      // 處理道具更新
+      this.props.forEach(prop => {
+        prop.update();
+      });
+      this.props.forEach(prop => {
+        if (prop.collide(this.player)) {
+          prop.isDead = true;
+          if (prop.type === 'heart' && this.life < 3) {
+            console.log(prop.type);
+            this.life += 1;
+          }
+          if (prop.type === 'defend' && !this.player.bonus.some(b => b === 'defend')) {
+            this.player.bonus.push('defend');
+            let newDefendDeg = 20;
+            let newDefendArc = 320;
+            TweenMax.to(this.player, 1.5, {defendDeg: newDefendDeg, defendArc: newDefendArc});
+            // 計時10秒
+            let time = setTimeout(() => {
+              this.player.bonus = this.player.bonus.filter(b => b !== 'defend');
+              TweenMax.to(this.player, 1.5, {defendDeg: 135, defendArc: 90});
+              clearTimeout(time);
+            }, 10000);
+          }
+        }
+      });
       // 玩家血量和能量控制
       if (this.energy < 100 && this.time % 30 === 0) {
-        this.energy++;
+        this.energy += 5;
       }
       if (this.energy === 0 && this.life > 0) {
         this.energy = 100;
@@ -368,6 +405,7 @@ export default {
       if (this.energy === 0 && this.life === 0) {
         this.isGameover = true;
       }
+      // 若無敵人 則更換關卡
       if (this.enemys.length === 0) {
         this.bullets = [];
         this.enemyBullets = [];
@@ -381,6 +419,7 @@ export default {
       this.enemyBullets = this.enemyBullets.filter(enemyBullet => !enemyBullet.isDead);
       this.bullets = this.bullets.filter(bullet => !bullet.isDead);
       this.enemys = this.enemys.filter(enemy => !enemy.isDead);
+      this.props = this.props.filter(prop => !prop.isDead);
     },
     load() {
       this.initCanvas();
@@ -472,6 +511,20 @@ export default {
     GameStart() {
       this.start = true;
       this.generateEnemys(this.level);
+    },
+    addProps() {
+      let randomAngle = Math.random() * 360 * Math.PI / 180;
+      let x = global.maxR * 1.5 * Math.cos(randomAngle);
+      let y = global.maxR * 1.5 * Math.sin(randomAngle);
+      let type = global.Props[parseInt(Math.random() * global.Props.length)];
+      let delta = this.player.p.sub(new Vec2(x, y));
+      let newV = delta.unit.mul(1.5);
+      this.props.push(new Prop({
+        ctx: this.ctx,
+        p: new Vec2(x, y),
+        v: newV,
+        type: type
+      }));
     }
   }
 };

@@ -32,7 +32,9 @@ class GameObject {
       this.p.y = global.height / 2 - this.r;
     }
   }
-  collide(gobj) {}
+  collide(gobj) {
+    return this.p.sub(gobj.p).length < this.r + gobj.r;
+  }
 }
 
 export default GameObject;

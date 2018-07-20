@@ -11,7 +11,8 @@ class Players extends GameObject {
       defendDeg: 135,
       defendArc: 90,
       dotR: 70,
-      bulletSpeed: 1
+      bulletSpeed: 1,
+      bonus: []
     };
     Object.assign(def, args);
     Object.assign(this, def);
@@ -101,7 +102,6 @@ class Players extends GameObject {
     this.direction = this.v.unit.angle;
     this.checkBoundary();
   }
-  collide(gobj) {}
 }
 
 export default Players;
