@@ -22,12 +22,12 @@ class Prop extends GameObject {
     ctx.translate(0 - this.r, 0 - this.r);
     if (this.type === 'heart') {
       let img = new Image();
-      img.src = '../../../static/image/heart.png';
+      img.src = './static/image/heart.png';
       ctx.drawImage(img, 0, 0, this.r * 2, this.r * 2);
     }
     if (this.type === 'defend') {
       let img = new Image();
-      img.src = '../../../static/image/defend.png';
+      img.src = './static/image/defend.png';
       ctx.drawImage(img, 0, 0, this.r * 2, this.r * 2);
     }
     ctx.restore();

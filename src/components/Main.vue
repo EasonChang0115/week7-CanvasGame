@@ -272,7 +272,7 @@ export default {
         }
         // 三角形敵人發射子彈
         if (enemy.type === 'triangle' && this.time % (enemy.bulletFreq + (index * enemy.bulletFreq * 0.5)) === 0) {
-           let initPosition = enemy.p.clone();
+          let initPosition = enemy.p.clone();
           let initV = this.player.p.sub(enemy.p).unit.mul(enemy.speed * 4);
           let args = {
             ctx: this.ctx,
@@ -377,7 +377,6 @@ export default {
         if (prop.collide(this.player)) {
           prop.isDead = true;
           if (prop.type === 'heart' && this.life < 3) {
-            console.log(prop.type);
             this.life += 1;
           }
           if (prop.type === 'defend' && !this.player.bonus.some(b => b === 'defend')) {
